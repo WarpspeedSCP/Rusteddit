@@ -1,0 +1,13 @@
+[package]
+name = "vkrust"
+version = "0.1.0"
+authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
+
+[dependencies]
+vulkano = "*"
+cgmath = "*"
+lazy_static = "*"
+vulkano-shader-derive = "0.10.0"
+image = "*"
+
+#![feature(const_slice_len)]

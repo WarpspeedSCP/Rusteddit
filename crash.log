@@ -1,0 +1,53 @@
+       Fresh semver-parser v0.7.0
+       Fresh void v1.0.2
+       Fresh version_check v0.1.4
+       Fresh rand_core v0.2.1
+       Fresh libc v0.2.43
+       Fresh stable_deref_trait v1.1.1
+       Fresh scopeguard v0.3.3
+       Fresh nodrop v0.1.12
+       Fresh cfg-if v0.1.5
+       Fresh memoffset v0.2.1
+       Fresh crossbeam-utils v0.5.0
+       Fresh half v1.3.0
+       Fresh approx v0.1.1
+       Fresh fnv v1.0.6
+       Fresh vk-sys v0.3.3
+       Fresh semver v0.9.0
+       Fresh unreachable v1.0.0
+       Fresh rand v0.5.5
+       Fresh rand v0.4.3
+       Fresh owning_ref v0.3.3
+       Fresh arrayvec v0.4.7
+       Fresh rustc_version v0.2.3
+       Fresh smallvec v0.6.5
+       Fresh lock_api v0.1.4
+       Fresh num-traits v0.2.6
+       Fresh lazy_static v1.1.0
+       Fresh num-traits v0.1.43
+       Fresh crossbeam-epoch v0.5.2
+       Fresh crossbeam-epoch v0.6.0
+       Fresh shared_library v0.1.9
+       Fresh cgmath v0.16.1
+       Fresh parking_lot_core v0.3.1
+       Fresh crossbeam-deque v0.5.2
+       Fresh parking_lot v0.6.4
+       Fresh crossbeam-channel v0.2.6
+       Fresh crossbeam v0.4.1
+       Fresh vulkano v0.10.0
+   Compiling vkrust v0.1.0 (/home/warpspeedscp/vkrust)
+     Running `rustc --crate-name vkrust src/main.rs --color never --crate-type bin --emit=dep-info,link -C debuginfo=2 -C metadata=f04f76cf9e72632c -C extra-filename=-f04f76cf9e72632c --out-dir /home/warpspeedscp/vkrust/target/debug/deps -C incremental=/home/warpspeedscp/vkrust/target/debug/incremental -L dependency=/home/warpspeedscp/vkrust/target/debug/deps --extern cgmath=/home/warpspeedscp/vkrust/target/debug/deps/libcgmath-e1416615e72d2112.rlib --extern lazy_static=/home/warpspeedscp/vkrust/target/debug/deps/liblazy_static-1435c456360420ad.rlib --extern vulkano=/home/warpspeedscp/vkrust/target/debug/deps/libvulkano-4fbf62aa069256cc.rlib`
+error[E0425]: cannot find value `LAYERS` in this scope
+   --> src/main.rs:129:9
+    |
+129 |         LAYERS.iter().cloned()
+    |         ^^^^^^ not found in this scope
+
+warning: unused import: `vulkano::device::*`
+  --> src/main.rs:18:5
+   |
+18 | use vulkano::device::*;
+   |     ^^^^^^^^^^^^^^^^^^
+   |
+   = note: #[warn(unused_imports)] on by default
+
