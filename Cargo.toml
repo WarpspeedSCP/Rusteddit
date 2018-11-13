@@ -4,10 +4,13 @@ version = "0.1.0"
 authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
 
 [dependencies]
-vulkano = "*"
-cgmath = "*"
+vulkano = "0.11"
 lazy_static = "*"
-vulkano-shader-derive = "0.10.0"
+#vulkano-shader-derive = "0.10.0"
 image = "*"
+vulkano-win = "0.11"
+vulkano-shaders = "0.11"
+winit = "0.18"
+log = "0.4"
 
 #![feature(const_slice_len)]
