@@ -26,7 +26,7 @@ use vulkano::sync;
 
 
 
-use crate::{get_valid_queue_families, init_instance, PriorityHolder, VertexPCNT, shaders, UBO};
+use crate::{get_valid_queue_families, init_instance, PriorityHolder, VertexPCNT, shaders, UBO, left};
 
 
 pub fn main() {
@@ -291,7 +291,7 @@ pub fn main() {
             0.01, 
             100.0
         ).into(),
-        model: (Matrix4::from_scale(3.)).into(),
+        model: (Matrix4::from_scale(2.)).into(),
         view: (
             Matrix4::look_at(
                 Point3::new(4., 4., 1.0), 
@@ -510,7 +510,7 @@ pub fn main() {
 
     use std::time::{Duration, Instant};
     let start_time = Instant::now();
-    //let mut prev_time = start_time.clone();
+    let mut prev_time = start_time.clone();
 
         //     currentTime = std::chrono::high_resolution_clock::now();
         // delta = std::chrono::duration<float, std::chrono::seconds::period>(
@@ -523,21 +523,29 @@ pub fn main() {
         // d->model = glm::rotate(glm::mat4(1), (float)time * glm::radians(45.0f), glm::vec3(0, 0, 1));
 
     let mut done = false;
+    let mut eye = Vector3::new(4., 4., 1.);
     loop {
         previous_frame_end.cleanup_finished();
 
 
         {
             let current_time = Instant::now();
-            //let delta = prev_time.duration_since(current_time.clone()).as_millis();
-            let elapsed_time =  current_time.duration_since(start_time.clone()).as_millis();
-
-
+            let delta = current_time.duration_since(prev_time).as_millis();
+            //let elapsed_time =  current_time.duration_since(start_time.clone()).as_millis();
+            prev_time = current_time;
+            eye = left(0.001 * delta as f32, &eye, Vector3::new(0., 0., 1.));
 
             let mut write_lock = ubo_buf.write().expect("Could not lock uniform buffer for write access.");
             use std::ops::DerefMut;
             let x = write_lock.deref_mut();
-            x.model = (Matrix4::from_angle_z(Deg(0.1) * elapsed_time as f32) * Matrix4::from_scale(2.)).into();
+            //x.model = (Matrix4::from_angle_z(Deg(0.1) * elapsed_time as f32) * Matrix4::from_scale(2.)).into();
+            x.view = (
+                Matrix4::look_at(
+                    Point3::from_homogeneous(eye.extend(1.)), 
+                    Point3::new(0.0, 0.0, 0.0), 
+                    Vector3::new(0.0, 0.0, 1.0)
+                )
+            ).into();
         }
 
         let (image_num, acquire_future) = acquire_next_image(swapchain.clone(), None).unwrap();
