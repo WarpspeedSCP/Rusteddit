@@ -8,9 +8,12 @@ vulkano = "0.11"
 lazy_static = "*"
 #vulkano-shader-derive = "0.10.0"
 image = "*"
+tobj = "0.1.6"
+itertools = "0.7.8"
 vulkano-win = "0.11"
 vulkano-shaders = "0.11"
 winit = "0.18"
 log = "0.4"
+cgmath = "*"
 
 #![feature(const_slice_len)]
