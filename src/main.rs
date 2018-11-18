@@ -267,6 +267,58 @@ Transfer q: {:#?}",
     }
 }
 
+pub fn left(degrees: f32, eye: &cgmath::Vector3<f32>, up: cgmath::Vector3<f32>) -> cgmath::Vector3<f32>
+{
+	// YOUR CODE FOR HW1 HERE
+
+    rotate(degrees, up) * eye
+}
+
+pub fn rotate(rads: f32, axis: cgmath::Vector3<f32>) -> cgmath::Matrix3<f32>
+{
+	// YOUR CODE FOR HW1 HERE
+
+	let aSin = rads.sin();
+    let aCos = rads.cos();
+
+    use cgmath::*;
+	let c1 = cgmath::Matrix3::from_value(aCos);
+
+	let mut c2 = cgmath::Matrix3::from_value(0f32);
+
+	let n = axis.normalize();
+
+	c2[0][0] = n.x * n.x;
+	c2[0][1] = n.x * n.y;
+	c2[0][2] = n.x * n.z;
+
+	c2[1][0] = n.y * n.x;
+	c2[1][1] = n.y * n.y;
+	c2[1][2] = n.y * n.z;
+
+	c2[2][0] = n.z * n.x;
+	c2[2][1] = n.z * n.y;
+	c2[2][2] = n.z * n.z;
+
+	c2 *= 1f32 - aCos;
+
+	let mut c3 = cgmath::Matrix3::from_value(0f32);
+
+	c3[0][1] = -n.z;
+	c3[0][2] = n.y;
+
+	c3[1][0] = n.z;
+	c3[1][2] = -n.x;
+
+	c3[2][0] = -n.y;
+	c3[2][1] = n.x;
+
+	c3 *= aSin;
+
+	// You will change this return call
+	return c1 + c2 + c3;
+}
+
 fn main() {
     three_d::main();
 }
