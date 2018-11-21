@@ -37,7 +37,7 @@ lazy_static! {
     pub static ref LAYERS: &'static [&'static str] = &[
         "VK_LAYER_LUNARG_standard_validation",
 //        "VK_LAYER_LUNARG_monitor",
-//        "VK_LAYER_LUNARG_api_dump"
+        //"VK_LAYER_LUNARG_api_dump"
     ];
 }
 
@@ -225,6 +225,20 @@ pub struct UBO {
     pub proj: [[f32;4]; 4]
 }
 
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct InstanceUBO {
+    
+}
+
+#[repr(C)]
+#[derive(Debug, Clone)] 
+pub struct Camera {
+    pub pos: cgmath::Vector3<f32>,
+    pub dir: cgmath::Vector3<f32>,
+    pub up: cgmath::Vector3<f32>
+}
+
 pub fn init_instance() -> Arc<Instance> {
     Instance::new(
         Some(&app_info_from_cargo_toml!()),
@@ -267,24 +281,35 @@ Transfer q: {:#?}",
     }
 }
 
-pub fn left(degrees: f32, eye: &cgmath::Vector3<f32>, up: cgmath::Vector3<f32>) -> cgmath::Vector3<f32>
+pub fn revolve_left(rads: f32, eye: &cgmath::Vector3<f32>, up: &cgmath::Vector3<f32>) -> cgmath::Vector3<f32>
 {
-	// YOUR CODE FOR HW1 HERE
-
-    rotate(degrees, up) * eye
+    rotate(rads, up) * eye
 }
 
-pub fn rotate(rads: f32, axis: cgmath::Vector3<f32>) -> cgmath::Matrix3<f32>
+pub fn revolve_up(rads: f32, eye: &cgmath::Vector3<f32>, up: &cgmath::Vector3<f32>) -> (cgmath::Vector3<f32>, cgmath::Vector3<f32>)
 {
-	// YOUR CODE FOR HW1 HERE
+    let c = eye.cross(up.clone());
+    (rotate(rads, &c) * eye, rotate(rads, &c) * up)
+}
+
+pub fn project_on_vec(u: &cgmath::Vector3<f32>, v: &cgmath::Vector3<f32>) -> cgmath::Vector3<f32> {
+    v * (cgmath::dot(u.clone(), v.clone()) / (v.x * v.x + v.y * v.y + v.z * v.z))
+}
+
+pub fn project_on_plane(u: &cgmath::Vector3<f32>, n: &cgmath::Vector3<f32>) -> cgmath::Vector3<f32> {
+    u - project_on_vec(u, n)
+}
+
+pub fn rotate(rads: f32, axis: &cgmath::Vector3<f32>) -> cgmath::Matrix3<f32>
+{
 
 	let aSin = rads.sin();
     let aCos = rads.cos();
 
     use cgmath::*;
-	let c1 = cgmath::Matrix3::from_value(aCos);
+	let c1 = Matrix3::from_value(aCos);
 
-	let mut c2 = cgmath::Matrix3::from_value(0f32);
+	let mut c2 = Matrix3::from_value(0f32);
 
 	let n = axis.normalize();
 
@@ -302,7 +327,7 @@ pub fn rotate(rads: f32, axis: cgmath::Vector3<f32>) -> cgmath::Matrix3<f32>
 
 	c2 *= 1f32 - aCos;
 
-	let mut c3 = cgmath::Matrix3::from_value(0f32);
+	let mut c3 = Matrix3::from_value(0f32);
 
 	c3[0][1] = -n.z;
 	c3[0][2] = n.y;
@@ -322,3 +347,7 @@ pub fn rotate(rads: f32, axis: cgmath::Vector3<f32>) -> cgmath::Matrix3<f32>
 fn main() {
     three_d::main();
 }
+
+// fn screenshot(device: Arc<vulkano::device::Device>, image: Arc<vulkano::image::SwapchainImage> ) {
+
+// }

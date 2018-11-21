@@ -26,7 +26,7 @@ use vulkano::sync;
 
 
 
-use crate::{get_valid_queue_families, init_instance, PriorityHolder, VertexPCNT, shaders, UBO, left};
+use crate::{get_valid_queue_families, init_instance, PriorityHolder, VertexPCNT, shaders, UBO, revolve_left, revolve_up, project_on_plane};
 
 
 pub fn main() {
@@ -329,7 +329,7 @@ pub fn main() {
         ).expect("Could not create render pass.")
     );
 
-    let mut frame_buffers = [
+    let frame_buffers = [
         Arc::new(
             Framebuffer::start(render_pass.clone())
             .add(swapchain_images[0].clone())
@@ -512,38 +512,130 @@ pub fn main() {
     let start_time = Instant::now();
     let mut prev_time = start_time.clone();
 
-        //     currentTime = std::chrono::high_resolution_clock::now();
-        // delta = std::chrono::duration<float, std::chrono::seconds::period>(
-        //             currentTime - prevTime)
-        //             .count();
-        // time = std::chrono::duration<float, std::chrono::seconds::period>(
-        //            currentTime - startTime)
-        //            .count();
-
-        // d->model = glm::rotate(glm::mat4(1), (float)time * glm::radians(45.0f), glm::vec3(0, 0, 1));
-
     let mut done = false;
-    let mut eye = Vector3::new(4., 4., 1.);
+    let mut camera = crate::Camera {
+        pos: Vector3::new(4., 0., 0.),
+        dir: Vector3::new(-1., 0., 0.),
+        up: Vector3::unit_y()
+    };
+    let mut pitch = 0.;
+    let mut yaw = 0.;
+    let mut left = false;
+    let mut right = false;
+    let mut up = false;
+    let mut down = false;
     loop {
         previous_frame_end.cleanup_finished();
-
 
         {
             let current_time = Instant::now();
             let delta = current_time.duration_since(prev_time).as_millis();
             //let elapsed_time =  current_time.duration_since(start_time.clone()).as_millis();
             prev_time = current_time;
-            eye = left(0.001 * delta as f32, &eye, Vector3::new(0., 0., 1.));
 
+            events_loop.poll_events(|ev| {
+                match ev {
+                    winit::Event::WindowEvent {
+                        event: winit::WindowEvent::CloseRequested,
+                        ..
+                    } => done = true,
+                    winit::Event::DeviceEvent {
+                        event: winit::DeviceEvent::MouseMotion {delta: m_delta},
+                        ..
+                    } => {
+                        //println!("mouse delta: {} {}", m_delta.0, m_delta.1);
+                        use cgmath::InnerSpace;
+                        let sensitivity = 0.01;
+                        let x_delta = m_delta.0 * sensitivity;
+                        let mut y_delta = m_delta.1 * sensitivity;
+                        //yaw += x_delta;
+                        pitch += y_delta;
+                        println!("pitch: {}\n
+yaw: {}", pitch, yaw);
+
+                        if pitch > 1.55334303 {
+                            pitch = std::f64::consts::FRAC_PI_2 - (std::f64::consts::PI / 180.);
+                            y_delta = 0.;
+                        }
+                        if pitch < -1.55334303 {
+                            pitch = -std::f64::consts::FRAC_PI_2 + (std::f64::consts::PI / 180.);
+                            y_delta = 0.;
+                        }
+                        // let cross = camera.dir.cross(camera.up).normalize();
+                        // camera.dir.x = 0.01 * (pitch.cos() * yaw.cos()) as f32;
+                        // camera.dir.y = 0.01 * pitch.sin() as f32;
+                        // camera.dir.z = 0.01 * (pitch.cos() * yaw.sin()) as f32;
+                        // camera.dir = camera.dir.normalize();
+                        // camera.up = camera.dir.cross(cross).normalize();
+
+                        println!("Camera direction: {:#?}\n
+Camera up: {:#?}", camera.dir, camera.up);
+                        camera.dir = revolve_left(x_delta as f32, &camera.dir, &camera.up);
+                        let x = revolve_up(y_delta as f32, &camera.dir, &camera.up);
+                        camera.dir = x.0;
+                        //camera.up = x.1;
+                    }
+                    winit::Event::DeviceEvent {
+                        event: winit::DeviceEvent::Key(key_info),
+                        ..
+                    } => {
+                        if key_info.virtual_keycode == Some(winit::VirtualKeyCode::A) {
+                            if key_info.state == winit::ElementState::Pressed {
+                                left = true;
+                            } else {
+                                left = false;
+                            } 
+                        } else if key_info.virtual_keycode == Some(winit::VirtualKeyCode::D) {
+                            if key_info.state == winit::ElementState::Pressed {
+                                right = true;
+                            } else {
+                                right = false;
+                            } 
+                        } else if key_info.virtual_keycode == Some(winit::VirtualKeyCode::W) {
+                            if key_info.state == winit::ElementState::Pressed {
+                                up = true;
+                            } else {
+                                up = false;
+                            } 
+                        } else if key_info.virtual_keycode == Some(winit::VirtualKeyCode::S) {
+                            if key_info.state == winit::ElementState::Pressed {
+                                down = true;
+                            } else {
+                                down = false;
+                            } 
+                        } else if key_info.virtual_keycode == Some(winit::VirtualKeyCode::Escape){
+                            done = true;
+                        }
+
+                    }
+                    _ => (),
+                }
+            });
+            
+            //dir = revolve_right(0.001 * delta as f32, &dir, &Vector3::new(0., 0., 1.));
+            use cgmath::InnerSpace;
             let mut write_lock = ubo_buf.write().expect("Could not lock uniform buffer for write access.");
             use std::ops::DerefMut;
             let x = write_lock.deref_mut();
+            if left {
+                //println!("camera pos: {:#?}\ncamera dir {:#?}", camera.pos, camera.dir);
+                camera.pos -= 0.01 * camera.dir.cross(Vector3::unit_y()).normalize();// = revolve_left(0.001 * delta as f32, &eye, &Vector3::new(0., 0., 1.));
+            }
+            if right {
+                camera.pos += 0.01 * camera.dir.cross(Vector3::unit_y()).normalize();
+            }
+            if up {
+                camera.pos += 0.01 * project_on_plane(&camera.dir, &Vector3::unit_y());
+            }
+            if down {
+                camera.pos -= 0.01 * project_on_plane(&camera.dir, &Vector3::unit_y());
+            }
             //x.model = (Matrix4::from_angle_z(Deg(0.1) * elapsed_time as f32) * Matrix4::from_scale(2.)).into();
             x.view = (
                 Matrix4::look_at(
-                    Point3::from_homogeneous(eye.extend(1.)), 
-                    Point3::new(0.0, 0.0, 0.0), 
-                    Vector3::new(0.0, 0.0, 1.0)
+                    Point3::from_homogeneous(camera.pos.extend(1.)), 
+                    Point3::from_homogeneous((camera.pos + camera.dir).extend(1.)), 
+                    camera.up
                 )
             ).into();
         }
@@ -562,15 +654,7 @@ pub fn main() {
 
         previous_frame_end = Box::new(future);
 
-        events_loop.poll_events(|ev| {
-            match ev {
-                winit::Event::WindowEvent {
-                    event: winit::WindowEvent::CloseRequested,
-                    ..
-                } => done = true,
-                _ => (),
-            }
-        });
+
         if done {
             return;
         }
