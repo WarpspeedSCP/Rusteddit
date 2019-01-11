@@ -4,16 +4,17 @@ version = "0.1.0"
 authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
 
 [dependencies]
-vulkano = "0.11"
+vulkano = { path = "vulkano/vulkano" }
 lazy_static = "*"
 #vulkano-shader-derive = "0.10.0"
 image = "*"
 tobj = "0.1.6"
 itertools = "0.7.8"
-vulkano-win = "0.11"
-vulkano-shaders = "0.11"
+vulkano-win = { path = "vulkano/vulkano-win" }
+vulkano-shaders = { path = "vulkano/vulkano-shaders" }
 winit = "0.18"
 log = "0.4"
 cgmath = "*"
+ordered-float = "1.0.1"
 
 #![feature(const_slice_len)]

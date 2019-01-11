@@ -57,8 +57,7 @@ pub fn main() {
             c: 1.0,
             t: 1.0,
         }),
-    )
-    .expect("couldn't create device with requested features and exts.");
+    ).expect("couldn't create device with requested features and exts.");
 
     let submit_queues: Vec<Arc<Queue>> = submit_queues.collect();
     println!("{}", submit_queues.len());
