@@ -304,9 +304,9 @@ pub fn main() {
             //indices,
                         vec![
                 VertexPCNT::new().pos([-0.5, -1., 0.]).uv([0., 0.]), //.colour([1., 0., 0.]),
-                VertexPCNT::new().pos([-1., 1., 0.]).uv([0., 1.]),   //.colour([1., 1., 0.]),
-                VertexPCNT::new().pos([1., 1., 0.]).uv([1., 1.]),    //.colour([0., 1., 1.]),
-                VertexPCNT::new().pos([1., -1., 0.]).uv([1., 0.]),   //.colour([0., 0., 1.]),
+                VertexPCNT::new().pos([-1. ,  1., 0.]).uv([0., 1.]),   //.colour([1., 1., 0.]),
+                VertexPCNT::new().pos([ 1. ,  1., 0.]).uv([1., 1.]),    //.colour([0., 1., 1.]),
+                VertexPCNT::new().pos([ 1. , -1., 0.]).uv([1., 0.]),   //.colour([0., 0., 1.]),
             ],
             vec![0u32, 1, 2, 2, 3, 0],
             vec![],
