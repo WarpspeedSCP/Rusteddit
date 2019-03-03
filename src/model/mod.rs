@@ -31,6 +31,8 @@ use vulkano::sync::{FlushError, GpuFuture};
 
 use crate::{InternalVertex, UBO};
 
+pub mod font;
+
 trait InternalCommandBuffer {}
 
 impl InternalCommandBuffer for AutoCommandBuffer {}
@@ -209,6 +211,7 @@ where
 
 pub trait ModelBase {
     fn get_cmd_bufs(&self) -> &Vec<Arc<AutoCommandBuffer>>;
+    fn get_cmd_bufs_mut(&mut self) -> &mut Vec<Arc<AutoCommandBuffer>>;
 }
 
 impl<T> ModelBase for Model<T, vulkano::format::Format>
@@ -217,5 +220,9 @@ where
 {
     fn get_cmd_bufs(&self) -> &Vec<Arc<AutoCommandBuffer>> {
         &self.cmd_bufs
+    }
+
+    fn get_cmd_bufs_mut(&mut self) -> &mut Vec<Arc<AutoCommandBuffer>> {
+        &mut self.cmd_bufs
     }
 }

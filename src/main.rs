@@ -1,12 +1,10 @@
 //#![feature(const_slice_len)]
 #![feature(range_contains)]
-#![feature(duration_as_u128)]
 #![feature(trace_macros)]
 
 #[macro_use]
 extern crate vulkano;
 
-#[macro_use]
 extern crate vulkano_shaders;
 
 #[macro_use]
@@ -25,6 +23,8 @@ extern crate tobj;
 extern crate vulkano_win;
 extern crate winit;
 
+extern crate rusttype;
+
 mod basic;
 mod model;
 mod renderer;
@@ -33,6 +33,7 @@ mod shaders;
 //mod resizable;
 
 use std::collections::HashSet;
+use std::fmt::Debug;
 use std::sync::Arc;
 
 use vulkano::instance::{Instance, InstanceExtensions, PhysicalDevice, QueueFamily};
@@ -41,8 +42,10 @@ lazy_static! {
     pub static ref LAYERS: &'static [&'static str] = &[
         "VK_LAYER_LUNARG_standard_validation",
 //        "VK_LAYER_LUNARG_monitor",
- //       "VK_LAYER_LUNARG_api_dump"
+//       "VK_LAYER_LUNARG_api_dump"
     ];
+
+   // pub static ref FONT_DATA: Font<'static> = Font::from_bytes(include_bytes!("../FiraCode-Medium.ttf") as &[u8]).unwrap();
 }
 
 pub struct QueueFamilyHolder<'a> {
@@ -132,7 +135,7 @@ impl VertexPCT {
     }
 }
 
-pub trait InternalVertex: Clone + Sync + Send {}
+pub trait InternalVertex: Clone + Sync + Send + Debug {}
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -235,7 +238,6 @@ impl VertexPC {
         self.inPosition = p;
         self
     }
-
 }
 
 impl_vertex!(VertexPC, inPosition, inColour);
@@ -300,8 +302,8 @@ pub fn init_instance() -> Arc<Instance> {
         Some(&app_info_from_cargo_toml!()),
         &InstanceExtensions {
             khr_surface: true,
-            //            khr_xcb_surface: true,
-            khr_xlib_surface: true,
+            khr_xcb_surface: true,
+            //           khr_xlib_surface: true,
             ..InstanceExtensions::none()
         },
         LAYERS.iter().cloned(),
@@ -321,9 +323,9 @@ pub fn get_valid_queue_families<'a>(physdev: &'a PhysicalDevice) -> QueueFamilyH
     let transfer_q = physdev
         .queue_families()
         .find(|x| x.supports_transfers() && !(x.supports_graphics() || x.supports_compute())).unwrap_or_else(
-            || { 
+            || {
                 eprintln!("No queue families with exclusive transfer support found! Switching to using universal queue family for transfer ops."); 
-                graphics_q.clone() 
+                graphics_q.clone()
             }
         );
 
@@ -411,7 +413,7 @@ pub fn rotate(rads: f32, axis: &cgmath::Vector3<f32>) -> cgmath::Matrix3<f32> {
 }
 
 fn main() {
-    //three_d::main()
+    use model::font;
     renderer::main();
 }
 

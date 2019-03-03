@@ -1,6 +1,6 @@
 pub mod basic_vs {
-    vulkano_shaders::shader!{
-        ty: "vertex",
+    vulkano_shaders::shader! {
+    ty: "vertex",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -24,8 +24,8 @@ void main() {
 }
 
 pub mod basic_fs {
-    vulkano_shaders::shader!{
-        ty: "fragment",
+    vulkano_shaders::shader! {
+    ty: "fragment",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -45,8 +45,8 @@ void main() {
 }
 
 pub mod diffuse_lighting_vs {
-    vulkano_shaders::shader!{
-        ty: "vertex",
+    vulkano_shaders::shader! {
+    ty: "vertex",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -82,10 +82,9 @@ void main() {
     struct dummy;
 }
 
-
 pub mod diffuse_lighting_fs {
-    vulkano_shaders::shader!{
-        ty: "fragment",
+    vulkano_shaders::shader! {
+    ty: "fragment",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -106,8 +105,8 @@ void main() {
 }
 
 pub mod image_3d_render_vs {
-    vulkano_shaders::shader!{
-        ty: "vertex",
+    vulkano_shaders::shader! {
+    ty: "vertex",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -119,17 +118,21 @@ layout(binding = 0) uniform uniformBufferObject {
     mat4 proj;
 } ubo;
 
+layout( push_constant ) uniform ColorBlock {
+  vec4 Color;
+} PushConstant;
+
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec2 inTexCoord;
 layout(location = 2) in vec3 inColour;
 
 layout(location = 0) out vec2 fragTexCoord;
-layout(location = 1) out vec3 outColour;
+layout(location = 1) out vec4 outColour;
 
 void main() {
     gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 1.0);
     fragTexCoord = inTexCoord;
-    outColour = inColour;
+    outColour = PushConstant.Color;
 
 }
 "
@@ -137,23 +140,22 @@ void main() {
     struct dummy;
 }
 
-
 pub mod image_3d_render_fs {
-    vulkano_shaders::shader!{
-        ty: "fragment",
+    vulkano_shaders::shader! {
+    ty: "fragment",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(location = 0) in vec2 fragTexCoord;
-layout (location = 1) in vec3 inColour;
+layout (location = 1) in vec4 inColour;
 
 layout(binding = 1) uniform sampler2D texSampler;
 
 layout(location = 0) out vec4 outColour;
 
 void main() {
-    outColour = vec4(inColour * texture(texSampler, fragTexCoord).rgb, 1.0);
+    outColour = inColour * texture(texSampler, fragTexCoord);
 }
 "
     }
@@ -161,8 +163,8 @@ void main() {
 }
 
 pub mod colour_3d_render_vs {
-    vulkano_shaders::shader!{
-        ty: "vertex",
+    vulkano_shaders::shader! {
+    ty: "vertex",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -189,10 +191,9 @@ void main() {
     struct dummy;
 }
 
-
 pub mod colour_3d_render_fs {
-    vulkano_shaders::shader!{
-        ty: "fragment",
+    vulkano_shaders::shader! {
+    ty: "fragment",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -210,8 +211,8 @@ void main() {
 }
 
 pub mod solid_colour_bg_vs {
-    vulkano_shaders::shader!{
-        ty: "vertex",
+    vulkano_shaders::shader! {
+    ty: "vertex",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
@@ -231,8 +232,8 @@ void main() {
 }
 
 pub mod solid_colour_bg_fs {
-    vulkano_shaders::shader!{
-        ty: "fragment",
+    vulkano_shaders::shader! {
+    ty: "fragment",
         src: "
 #version 450
 #extension GL_ARB_separate_shader_objects : enable

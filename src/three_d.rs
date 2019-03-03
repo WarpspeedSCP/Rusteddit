@@ -213,8 +213,8 @@ pub fn main() {
                         dimensions: dimensions.clone(),
                     },
                 )]
-                    .iter()
-                    .cloned(),
+                .iter()
+                .cloned(),
             )
             .depth_clamp(false)
             .front_face_counter_clockwise()
@@ -302,11 +302,11 @@ pub fn main() {
         Model::new(
             //vertices,
             //indices,
-                        vec![
+            vec![
                 VertexPCNT::new().pos([-0.5, -1., 0.]).uv([0., 0.]), //.colour([1., 0., 0.]),
-                VertexPCNT::new().pos([-1. ,  1., 0.]).uv([0., 1.]),   //.colour([1., 1., 0.]),
-                VertexPCNT::new().pos([ 1. ,  1., 0.]).uv([1., 1.]),    //.colour([0., 1., 1.]),
-                VertexPCNT::new().pos([ 1. , -1., 0.]).uv([1., 0.]),   //.colour([0., 0., 1.]),
+                VertexPCNT::new().pos([-1., 1., 0.]).uv([0., 1.]),   //.colour([1., 1., 0.]),
+                VertexPCNT::new().pos([1., 1., 0.]).uv([1., 1.]),    //.colour([0., 1., 1.]),
+                VertexPCNT::new().pos([1., -1., 0.]).uv([1., 0.]),   //.colour([0., 0., 1.]),
             ],
             vec![0u32, 1, 2, 2, 3, 0],
             vec![],
@@ -334,12 +334,12 @@ pub fn main() {
                 Vector3::new(0.0, 0.0, 1.0),
             ))
             .into(),
-        }; 
+        };
         /*UBO {
-                        model: cgmath::Matrix4::from_value(1.).into(),
-                        view: cgmath::Matrix4::from_value(1.).into(),
-                        proj: cgmath::Matrix4::from_value(1.).into(),
-                    };*/
+            model: cgmath::Matrix4::from_value(1.).into(),
+            view: cgmath::Matrix4::from_value(1.).into(),
+            proj: cgmath::Matrix4::from_value(1.).into(),
+        };*/
 
         ubo.proj[1][1] *= -1.;
 

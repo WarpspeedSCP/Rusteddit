@@ -216,42 +216,40 @@ impl Renderer {
 
         let render_pass = Arc::new(
             vulkano::single_pass_renderpass!(device.clone(),
-            attachments: {
-                multisampled_color: {
-                    load:    Clear,
-                    store:   DontCare,
-                    format:  swapchain.format(),
-                    samples: 4,
+                attachments: {
+                    multisampled_color: {
+                        load:    Clear,
+                        store:   DontCare,
+                        format:  swapchain.format(),
+                        samples: 4,
+                    },
+                    resolve_color: {
+                        load:    DontCare,
+                        store:   Store,
+                        format:  swapchain.format(),
+                        samples: 1,
+                    },
+                    multisampled_depth: {
+                        load:    Clear,
+                        store:   DontCare,
+                        format:  Format::D16Unorm,
+                        samples: 4,
+                    },
+                    resolve_depth: {
+                        load:    DontCare,
+                        store:   Store,
+                        format:  Format::D16Unorm,
+                        samples: 1,
+                        initial_layout: ImageLayout::Undefined,
+                        final_layout: ImageLayout::DepthStencilAttachmentOptimal,
+                    }
                 },
-                resolve_color: {
-                    load:    DontCare,
-                    store:   Store,
-                    format:  swapchain.format(),
-                    samples: 1,
-                },
-                multisampled_depth: {
-                    load:    Clear,
-                    store:   DontCare,
-                    format:  Format::D16Unorm,
-                    samples: 4,
-                },
-                resolve_depth: {
-                    load:    DontCare,
-                    store:   Store,
-                    format:  Format::D16Unorm,
-                    samples: 1,
-                    initial_layout: ImageLayout::Undefined,
-                    final_layout: ImageLayout::DepthStencilAttachmentOptimal,
+                pass: {
+                    color: [multisampled_color],
+                    depth_stencil: {multisampled_depth},
+                    resolve: [resolve_color]
                 }
-            },
-            pass: {
-//                color: [color],
-//                depth_stencil: {depth}
-                color: [multisampled_color],
-                depth_stencil: {multisampled_depth},
-                resolve: [resolve_color]
-            }
-        )
+            )
             .unwrap(),
         ) as Arc<RenderPassAbstract + Send + Sync>;
 
@@ -425,7 +423,7 @@ impl Renderer {
 
         let camera = crate::Camera {
             pos: cgmath::Vector3::new(1., 0., 0.),
-            dir: cgmath::Vector3::new(-1., 0., 0.),
+            dir: cgmath::Vector3::new(1., 0., 0.),
             up: cgmath::Vector3::unit_y(),
             pitch: 0.,
         };
@@ -456,7 +454,7 @@ impl Renderer {
         }
     }
 
-    pub fn render(mut self, models: Vec<Arc<model::ModelBase>>) -> Self {
+    pub fn render(mut self, models: Vec<&model::ModelBase>) -> Self {
         self.current_op_future.cleanup_finished();
         // use std::time::Instant;
         // let current_time = Instant::now();
@@ -563,7 +561,7 @@ impl Renderer {
 }
 
 pub fn main() {
-    let mut r = Renderer::new(800, 600);
+    let mut r = Renderer::new(1024, 1024);
     let (mut m1, mut m2) = {
         let img = image::open(&std::path::Path::new(
             "/home/warpspeedscp/vkrust/chalet.jpg",
@@ -593,78 +591,74 @@ pub fn main() {
         }
 
         (
-            Arc::new(
-                model::Model::new(
-                    //vertices,
-                    //indices,
-                    vec![
-                        VertexPC::new()
-                            .pos([-1., -1., 0.]) /*.uv([0., 0.])*/
-                            .colour([1., 0., 0.]),
-                        VertexPC::new()
-                            .pos([-1., 1., 0.]) /*.uv([0., 1.])*/
-                            .colour([1., 1., 0.]),
-                        VertexPC::new()
-                            .pos([1., 1., 0.]) /*.uv([1., 1.])*/
-                            .colour([0., 1., 1.]),
-                        VertexPC::new()
-                            .pos([1., -1., 0.]) /*.uv([1., 0.])*/
-                            .colour([0., 0., 1.]),
-                    ],
-                    vec![0, 1, 2, 2, 3, 0],
-                    vec![], //img_vec,
-                    Format::R8G8B8A8Unorm,
-                    Dimensions::Dim2d {
-                        width: w,
-                        height: h,
-                    },
-                    r.queues[1].clone(),
-                    r.pipelines.colour_3d_pipe.clone(),
-                    0,
-                    true,
-                )
-                .expect("Could not create model."),
-            ),
-            Arc::new(
-                model::Model::new(
-                    vec![
-                        VertexPCT::new()
-                            .pos([-1., -1., 0.])
-                            .uv([0., 0.])
-                            .colour([1., 0., 0.]),
-                        VertexPCT::new()
-                            .pos([-1., 1., 0.])
-                            .uv([0., 1.])
-                            .colour([1., 1., 0.]),
-                        VertexPCT::new()
-                            .pos([1., 1., 0.])
-                            .uv([1., 1.])
-                            .colour([0., 1., 1.]),
-                        VertexPCT::new()
-                            .pos([1., -1., 0.])
-                            .uv([1., 0.])
-                            .colour([0., 0., 1.]),
-                    ],
-                    vec![0, 1, 2, 2, 3, 0],
-                    img_vec,
-                    Format::R8G8B8A8Unorm,
-                    Dimensions::Dim2d {
-                        width: w,
-                        height: h,
-                    },
-                    r.queues[1].clone(),
-                    r.pipelines.image_3d_pipe.clone(),
-                    0,
-                    true,
-                )
-                .expect("Could not create model."),
-            ),
+            model::Model::new(
+                //vertices,
+                //indices,
+                vec![
+                    VertexPC::new()
+                        .pos([-1., -1., 0.]) /*.uv([0., 0.])*/
+                        .colour([1., 0., 0.]),
+                    VertexPC::new()
+                        .pos([-1., 1., 0.]) /*.uv([0., 1.])*/
+                        .colour([1., 1., 0.]),
+                    VertexPC::new()
+                        .pos([1., 1., 0.]) /*.uv([1., 1.])*/
+                        .colour([0., 1., 1.]),
+                    VertexPC::new()
+                        .pos([1., -1., 0.]) /*.uv([1., 0.])*/
+                        .colour([0., 0., 1.]),
+                ],
+                vec![0, 1, 2, 2, 3, 0],
+                vec![], //img_vec,
+                Format::R8G8B8A8Unorm,
+                Dimensions::Dim2d {
+                    width: w,
+                    height: h,
+                },
+                r.queues[0].clone(),
+                r.pipelines.colour_3d_pipe.clone(),
+                0,
+                true,
+            )
+            .expect("Could not create model."),
+            model::Model::new(
+                vec![
+                    VertexPCT::new()
+                        .pos([-1., -1., 0.])
+                        .uv([0., 0.])
+                        .colour([1., 0., 0.]),
+                    VertexPCT::new()
+                        .pos([-1., 1., 0.])
+                        .uv([0., 1.])
+                        .colour([1., 1., 0.]),
+                    VertexPCT::new()
+                        .pos([1., 1., 0.])
+                        .uv([1., 1.])
+                        .colour([0., 1., 1.]),
+                    VertexPCT::new()
+                        .pos([1., -1., 0.])
+                        .uv([1., 0.])
+                        .colour([0., 0., 1.]),
+                ],
+                vec![0, 1, 2, 2, 3, 0],
+                img_vec,
+                Format::R8G8B8A8Unorm,
+                Dimensions::Dim2d {
+                    width: w,
+                    height: h,
+                },
+                r.queues[0].clone(),
+                r.pipelines.image_3d_pipe.clone(),
+                0,
+                true,
+            )
+            .expect("Could not create model."),
         )
     };
 
     {
-        let mut_m1 = Arc::get_mut(&mut m1).unwrap();
-        for i in 0..r.framebuffers.len() {
+        let mut_m1 = &mut m1;
+        for _ in 0..r.framebuffers.len() {
             mut_m1.cmd_bufs.push(Arc::new({
                 AutoCommandBufferBuilder::secondary_graphics_simultaneous_use(
                     r.queues[0].device().clone(),
@@ -699,7 +693,7 @@ pub fn main() {
             }));
         }
 
-        let mut_m2 = Arc::get_mut(&mut m2).unwrap();
+        let mut_m2 = &mut m2;
         for _ in 0..r.framebuffers.len() {
             mut_m2.cmd_bufs.push(Arc::new({
                 AutoCommandBufferBuilder::secondary_graphics(
@@ -714,7 +708,9 @@ pub fn main() {
                     vec![mut_m2.vertices.clone()],
                     mut_m2.indices.clone(),
                     vec![mut_m2.descriptor_set.clone().unwrap()],
-                    (),
+                    shaders::image_3d_render_vs::ty::ColorBlock {
+                        Color: cgmath::Vector4::unit_x().into(),
+                    },
                 )
                 .expect("Could not record indexed draw command.")
                 // .copy_image_to_buffer(storage_img.clone(), storage_buf.clone())
@@ -726,7 +722,7 @@ pub fn main() {
     }
     {
         use cgmath::*;
-        let m1 = Arc::get_mut(&mut m1).unwrap();
+        // let m1 = &mut m1;
         let m1_ubo = m1.ubo.clone().unwrap();
         let mut write_lock = m1_ubo
             .write()
@@ -743,7 +739,7 @@ pub fn main() {
         x.proj = cgmath::perspective(Deg(60.), 4. / 3., 0.001, 1000.0).into();
         x.proj[1][1] *= -1.;
 
-        let m2 = Arc::get_mut(&mut m2).unwrap();
+        // let m2 = Arc::get_mut(&mut m2).unwrap();
         let m1_ubo = m2.ubo.clone().unwrap();
         let mut write_lock = m1_ubo
             .write()
@@ -760,41 +756,88 @@ pub fn main() {
         x.proj[1][1] *= -1.;
 
         r.camera.pos = Vector3::unit_y();
+        r.camera.dir = Vector3::unit_z();
     }
+
+    let mut colourTable: Vec<[f32; 4]> = vec![
+        cgmath::Vector4::unit_w().into(),
+        cgmath::Vector4::unit_x().into(),
+        cgmath::Vector4::unit_y().into(),
+        cgmath::Vector4::unit_z().into(),
+    ];
+    let mut colourTable = colourTable.into_iter().cycle();
+
+    let mut old_cmd_bufs: Vec<Arc<vulkano::command_buffer::AutoCommandBuffer>>;
+
     while !r.done {
         {
+            use crate::model::ModelBase;
             use cgmath::*;
+            use std::mem::replace;
             use std::ops::DerefMut;
-            let m1 = Arc::get_mut(&mut m1).unwrap();
-            let m2 = Arc::get_mut(&mut m2).unwrap();
 
-            let m1_ubo = m1.ubo.clone().unwrap();
-            let mut write_lock = m1_ubo
-                .write()
-                .expect("Could not lock uniform buffer for write access.");
-            let x = write_lock.deref_mut();
-            
-            x.view = (Matrix4::look_at(
-                Point3::from_homogeneous(r.camera.pos.extend(1.)),
-                Point3::from_homogeneous((r.camera.pos + r.camera.dir).extend(1.)),
-                r.camera.up,
-            ))
-            .into();
+            old_cmd_bufs = m2.cmd_bufs;
+            m2.cmd_bufs = Vec::new();
+            for _ in 0..r.framebuffers.len() {
+                m2.cmd_bufs.push(Arc::new({
+                    AutoCommandBufferBuilder::secondary_graphics(
+                        r.queues[0].device().clone(),
+                        r.queues[0].family(),
+                        Subpass::from(r.render_pass.clone(), 0).unwrap(),
+                    )
+                    .expect("Could not create draw command buffer.")
+                    .draw_indexed(
+                        m2.pipeline.clone(),
+                        &DynamicState::none(),
+                        vec![m2.vertices.clone()],
+                        m2.indices.clone(),
+                        vec![m2.descriptor_set.clone().unwrap()],
+                        shaders::image_3d_render_vs::ty::ColorBlock {
+                            Color: colourTable.next().unwrap(),
+                        },
+                    )
+                    .expect("Could not record indexed draw command.")
+                    // .copy_image_to_buffer(storage_img.clone(), storage_buf.clone())
+                    // .expect("Could not record image to buffer copy op.")
+                    .build()
+                    .expect("Could not build command buffer.")
+                }));
+            }
 
-            let m1_ubo = m2.ubo.clone().unwrap();
-            let mut write_lock = m1_ubo
-                .write()
-                .expect("Could not lock uniform buffer for write access.");
-            let x = write_lock.deref_mut();
-            x.model = (Matrix4::from_translation(3f32 * Vector3::unit_z())).into();
-            x.view = (Matrix4::look_at(
-                Point3::from_homogeneous(r.camera.pos.extend(1.)),
-                Point3::from_homogeneous((r.camera.pos + r.camera.dir).extend(1.)),
-                r.camera.up,
-            ))
-            .into();
-
-        }//m2.clone(),
-        r = r.render(vec![ m2.clone()]).handle_events();
+            {
+                let m1_ubo = m1.ubo.clone().unwrap();
+                let mut write_lock = m1_ubo
+                    .write()
+                    .expect("Could not lock uniform buffer for write access.");
+                let x = write_lock.deref_mut();
+                x.model = (Matrix4::from_translation(Vector3::unit_z() * 4.)
+                    + Matrix4::from_translation(Vector3::unit_y() * 2.))
+                .into();
+                x.view = (Matrix4::look_at(
+                    Point3::from_homogeneous(r.camera.pos.extend(1.)),
+                    Point3::from_homogeneous((r.camera.pos + r.camera.dir).extend(1.)),
+                    r.camera.up,
+                ))
+                .into();
+            }
+            {
+                let m2_ubo = m2.ubo.clone().unwrap();
+                let mut write_lock = m2_ubo
+                    .write()
+                    .expect("Could not lock uniform buffer for write access.");
+                let x = write_lock.deref_mut();
+                x.model = ((Matrix4::from_translation(Vector3::unit_z() * 3.)
+                    + Matrix4::from_translation(Vector3::unit_y() * 2.5))
+                    * Matrix4::from_scale(0.25))
+                .into();
+                x.view = (Matrix4::look_at(
+                    Point3::from_homogeneous(r.camera.pos.extend(1.)),
+                    Point3::from_homogeneous((r.camera.pos + r.camera.dir).extend(1.)),
+                    r.camera.up,
+                ))
+                .into();
+            }
+        } //m2.clone(),
+        r = r.render(vec![&m1, &m2]).handle_events();
     }
 }

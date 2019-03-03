@@ -15,20 +15,21 @@ use vulkano::command_buffer::{AutoCommandBufferBuilder, DynamicState};
 use vulkano::descriptor::descriptor_set::PersistentDescriptorSet;
 use vulkano::device::{Device, DeviceExtensions, Features, Queue};
 use vulkano::format::Format;
-use vulkano::framebuffer::{Framebuffer, FramebufferAbstract, Subpass, RenderPassAbstract};
+use vulkano::framebuffer::{Framebuffer, FramebufferAbstract, RenderPassAbstract, Subpass};
 use vulkano::image::{Dimensions, ImageUsage, ImmutableImage, StorageImage, SwapchainImage};
 use vulkano::instance::{Instance, InstanceExtensions, PhysicalDevice, QueueFamily};
+use vulkano::pipeline::viewport::{Scissor, Viewport};
 use vulkano::pipeline::GraphicsPipeline;
-use vulkano::pipeline::viewport::{Viewport, Scissor};
-use vulkano::sampler::{Sampler, SamplerAddressMode, Filter, MipmapMode};
-use vulkano::swapchain::{acquire_next_image, AcquireError, PresentMode, SurfaceTransform, Swapchain, SwapchainCreationError};
+use vulkano::sampler::{Filter, MipmapMode, Sampler, SamplerAddressMode};
 use vulkano::swapchain;
-use vulkano::sync::{GpuFuture, FlushError};
+use vulkano::swapchain::{
+    acquire_next_image, AcquireError, PresentMode, SurfaceTransform, Swapchain,
+    SwapchainCreationError,
+};
 use vulkano::sync;
+use vulkano::sync::{FlushError, GpuFuture};
 
-
-
-use crate::{PriorityHolder, get_valid_queue_families, init_instance, VertexPCT};
+use crate::{get_valid_queue_families, init_instance, PriorityHolder, VertexPCT};
 
 //fn init_pipeline<'a>(device: Arc<Device>) -> () {}
 
@@ -57,7 +58,8 @@ pub fn main() {
             c: 1.0,
             t: 1.0,
         }),
-    ).expect("couldn't create device with requested features and exts.");
+    )
+    .expect("couldn't create device with requested features and exts.");
 
     let submit_queues: Vec<Arc<Queue>> = submit_queues.collect();
     println!("{}", submit_queues.len());
@@ -68,7 +70,10 @@ pub fn main() {
         .with_dimensions((800u32, 600u32).into())
         .build_vk_surface(&events_loop, instance.clone())
         .expect("Could not create vulkan window surface.");
-    if !surface.is_supported(submit_queues[0].family()).expect("Could not retrieve surface capabilities.") {
+    if !surface
+        .is_supported(submit_queues[0].family())
+        .expect("Could not retrieve surface capabilities.")
+    {
         return;
     }
 
@@ -105,8 +110,10 @@ pub fn main() {
     )
     .expect("failed to create swapchain");
 
-    let vert_shader = shaders::basic_vs::Shader::load(dev.clone()).expect("Could not load vertex shader.");
-    let frag_shader = shaders::basic_fs::Shader::load(dev.clone()).expect("Could not load fragment shader.");
+    let vert_shader =
+        shaders::basic_vs::Shader::load(dev.clone()).expect("Could not load vertex shader.");
+    let frag_shader =
+        shaders::basic_fs::Shader::load(dev.clone()).expect("Could not load fragment shader.");
 
     let vert_size = std::mem::size_of::<VertexPCT>();
     let index_size = std::mem::size_of::<u32>();
@@ -249,29 +256,33 @@ pub fn main() {
         .expect("Could not create render pass."),
     );
 
-    let mut dynamic_state = DynamicState { line_width: None, viewports: None, scissors: None };
+    let mut dynamic_state = DynamicState {
+        line_width: None,
+        viewports: None,
+        scissors: None,
+    };
     let mut frame_buffers = [
         Arc::new(
             Framebuffer::start(render_pass.clone())
-            .add(swapchain_images[0].clone())
-            .expect("Could not add image to framebuffer.")
-            .build()
-            .expect("Could not create framebuffer.")
+                .add(swapchain_images[0].clone())
+                .expect("Could not add image to framebuffer.")
+                .build()
+                .expect("Could not create framebuffer."),
         ),
         Arc::new(
             Framebuffer::start(render_pass.clone())
-            .add(swapchain_images[1].clone())
-            .expect("Could not add image to framebuffer.")
-            .build()
-            .expect("Could not create framebuffer.")
+                .add(swapchain_images[1].clone())
+                .expect("Could not add image to framebuffer.")
+                .build()
+                .expect("Could not create framebuffer."),
         ),
         Arc::new(
             Framebuffer::start(render_pass.clone())
-            .add(swapchain_images[2].clone())
-            .expect("Could not add image to framebuffer.")
-            .build()
-            .expect("Could not create framebuffer.")
-        )
+                .add(swapchain_images[2].clone())
+                .expect("Could not add image to framebuffer.")
+                .build()
+                .expect("Could not create framebuffer."),
+        ),
     ];
     let graphics_pipeline = Arc::new(
         GraphicsPipeline::start()
@@ -290,7 +301,9 @@ pub fn main() {
                         origin: [0, 0],
                         dimensions: [800, 600],
                     },
-                )].iter().cloned(),
+                )]
+                .iter()
+                .cloned(),
             )
             .depth_clamp(false)
             .depth_write(false)
@@ -311,8 +324,6 @@ pub fn main() {
 Submit queues[0]: {:#?}",
         dev, submit_queues[0]
     );
-
-
 
     let cmd_bufs = vec![
         Arc::new(
@@ -405,7 +416,6 @@ Submit queues[0]: {:#?}",
                 )
                 .expect("Could not record indexed draw command.")
                 .end_render_pass()
-                
                 .expect("Could not record render pass end command.")
                 .build()
                 .expect("Could not build command buffer."),
@@ -423,7 +433,7 @@ Submit queues[0]: {:#?}",
     // let final_img =
     //     image::ImageBuffer::<image::Bgra<u8>, _>::from_raw(w, h, &buffer_content[..]).unwrap();
     // final_img.save("triangle.png").unwrap();
-    
+
     let mut done = false;
 
     loop {
@@ -431,26 +441,24 @@ Submit queues[0]: {:#?}",
 
         let (image_num, acquire_future) = acquire_next_image(swapchain.clone(), None).unwrap();
         //println!("Rendering to image: {}", image_num);
-        
+
         let future = previous_frame_end
-           .join(acquire_future)
-           .then_execute(submit_queues[0].clone(), cmd_bufs[image_num].clone())
-           .expect("Could not execute command buffer.")
-           .then_swapchain_present(submit_queues[0].clone(), swapchain.clone(), image_num)
-           .then_signal_fence_and_flush()
-           .expect("Could not signal fence after submit.");
+            .join(acquire_future)
+            .then_execute(submit_queues[0].clone(), cmd_bufs[image_num].clone())
+            .expect("Could not execute command buffer.")
+            .then_swapchain_present(submit_queues[0].clone(), swapchain.clone(), image_num)
+            .then_signal_fence_and_flush()
+            .expect("Could not signal fence after submit.");
         future.wait(None).expect("Timed out while waiting");
 
         previous_frame_end = Box::new(future);
 
-        events_loop.poll_events(|ev| {
-            match ev {
-                winit::Event::WindowEvent {
-                    event: winit::WindowEvent::CloseRequested,
-                    ..
-                } => done = true,
-                _ => (),
-            }
+        events_loop.poll_events(|ev| match ev {
+            winit::Event::WindowEvent {
+                event: winit::WindowEvent::CloseRequested,
+                ..
+            } => done = true,
+            _ => (),
         });
         if done {
             return;

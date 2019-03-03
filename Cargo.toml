@@ -6,7 +6,6 @@ authors = ["Raghav Shankar <warpspeedscp@gmail.com>"]
 [dependencies]
 vulkano = { path = "vulkano/vulkano" }
 lazy_static = "*"
-#vulkano-shader-derive = "0.10.0"
 image = "*"
 tobj = "0.1.6"
 itertools = "0.7.8"
@@ -16,5 +15,4 @@ winit = "0.18"
 log = "0.4"
 cgmath = "*"
 ordered-float = "1.0.1"
-
-#![feature(const_slice_len)]
+rusttype = "0.7.5"
